@@ -117,6 +117,42 @@ main{padding-block:14px 32px}
 .diag code{font-family:var(--f-mono);background:var(--panel-2);padding:2px 5px;border-radius:4px;color:var(--fg)}
 .diag ul{padding-left:18px}
 details.cfg{padding:0 12px}
+/* simple mode */
+.sm{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:14px;align-items:start}
+.sm-card{padding:18px}
+.sm-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.sm-top h3,.sm h3{margin:0;font:600 10px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.sm-hz{display:flex;gap:4px}
+.verdict{margin-top:14px;border-radius:12px;padding:22px 18px;text-align:center;background:var(--panel-2);border:1px solid var(--line)}
+.verdict.up{background:var(--up-soft);border-color:var(--up);color:var(--up)}
+.verdict.down{background:var(--down-soft);border-color:var(--down);color:var(--down)}
+.verdict .arrow{font:700 46px/1 var(--f-display)}
+.verdict .word{font:700 clamp(22px,6vw,32px)/1.15 var(--f-display);margin-top:8px;text-wrap:balance}
+.verdict .sub{font-size:13px;color:var(--muted);margin-top:8px}
+.timer{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:14px;font:600 13px var(--f-mono);color:var(--muted)}
+.timer .ring{width:34px;height:34px}
+.why{list-style:none;padding:0;margin:14px 0 0;display:flex;flex-direction:column;gap:8px}
+.why li{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:start;font-size:14px}
+.why b{font:700 15px/1.3 var(--f-mono);text-align:center}
+.why .p{color:var(--up)}.why .m{color:var(--down)}.why .z{color:var(--muted)}
+.honest{display:flex;flex-direction:column;gap:12px}
+.big-stat{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.big-stat b{font:700 38px/1 var(--f-display)}
+.big-stat span{color:var(--muted)}
+.meter{position:relative;height:12px;border-radius:6px;background:var(--panel-2);border:1px solid var(--line);overflow:hidden}
+.meter i{position:absolute;left:0;top:0;bottom:0;background:var(--accent)}
+.meter u{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--fg)}
+.meter-l{display:flex;justify-content:space-between;font:11px var(--f-mono);color:var(--muted)}
+.verdict-box{border-radius:10px;padding:12px 14px;font-size:14px;line-height:1.5}
+.verdict-box.bad{background:var(--down-soft);color:var(--fg);border-left:3px solid var(--down)}
+.verdict-box.ok{background:var(--up-soft);color:var(--fg);border-left:3px solid var(--up)}
+.sm-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mini{background:var(--panel-2);border-radius:8px;padding:10px 12px}
+.mini span{display:block;font-size:12px;color:var(--muted)}
+.mini b{font:600 17px/1.3 var(--f-mono)}
+.livelog{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;max-height:240px;overflow:auto}
+.livelog li{display:flex;justify-content:space-between;gap:10px;font:12.5px var(--f-mono);padding:7px 10px;background:var(--panel-2);border-radius:6px}
+@media (max-width:860px){.sm{grid-template-columns:minmax(0,1fr)}}
 details.cfg summary{cursor:pointer;color:var(--muted);font-size:13px;padding:10px 0;list-style:none}
 details.cfg summary::before{content:"＋ ";color:var(--accent)}
 details.cfg[open] summary::before{content:"－ "}
@@ -198,7 +234,7 @@ footer{color:var(--muted);font-size:12px;padding-block:0 28px}
       <option value="binance">Binance</option>
       <option value="bybit">Bybit</option>
       <option value="okx">OKX</option>
-      <option value="mexc">MEXC</option>
+      <option value="mexc">MEXC (часто недоступна)</option>
     </select>
     <div class="search">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
@@ -220,15 +256,56 @@ footer{color:var(--muted);font-size:12px;padding-block:0 28px}
 <div class="wrap">
   <nav class="rail" id="tfRail" aria-label="Таймфрейм"></nav>
   <div class="tabs" role="tablist">
-    <button class="tab on" data-view="chart" role="tab">График</button>
+    <button class="tab on" data-view="simple" role="tab">Простой</button>
+    <button class="tab" data-view="chart" role="tab">График</button>
     <button class="tab" data-view="screener" role="tab">Скринер</button>
     <button class="tab" data-view="backtest" role="tab">Бэктест</button>
   </div>
 </div>
 
 <main class="wrap">
+  <!-- SIMPLE -->
+  <section id="view-simple">
+    <div class="sm">
+      <div class="panel sm-card">
+        <div class="sm-top">
+          <h3 id="smTitle">Сделка на 1 минуту</h3>
+          <div class="sm-hz" id="smHz">
+            <button class="tf on" data-hz="1m">1 мин</button><button class="tf" data-hz="5m">5 мин</button><button class="tf" data-hz="15m">15 мин</button>
+          </div>
+        </div>
+        <div class="verdict" id="smVerdict"><div class="arrow">…</div><div class="word">Загружаю данные</div><div class="sub">Пару выбери в поиске вверху</div></div>
+        <div class="timer"><svg class="ring" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="var(--line)" stroke-width="4"/><circle id="smRing" cx="18" cy="18" r="15" fill="none" stroke="var(--accent)" stroke-width="4" stroke-dasharray="94.25" stroke-dashoffset="0" transform="rotate(-90 18 18)"/></svg><span id="smTimer">—</span></div>
+        <h3 style="margin-top:18px">Почему так</h3>
+        <ul class="why" id="smWhy"></ul>
+      </div>
+      <div class="honest">
+        <div class="panel sm-card">
+          <h3>Честная проверка на истории</h3>
+          <div class="big-stat" style="margin-top:12px"><b id="smAcc">—</b><span id="smAccTxt">угадано</span></div>
+          <div style="margin-top:12px" class="meter"><i id="smBar" style="width:0"></i><u id="smBe" style="left:55.6%"></u></div>
+          <div class="meter-l"><span>0%</span><span id="smBeL">ноль: 55,6%</span><span>100%</span></div>
+          <div class="sm-row" style="margin-top:12px">
+            <div class="mini"><span>Если ставить по 100 ₽</span><b id="smPnl">—</b></div>
+            <div class="mini"><span>Монетка (наугад)</span><b id="smCoin">—</b></div>
+          </div>
+          <div class="verdict-box" id="smHonest" style="margin-top:12px" hidden></div>
+          <div class="sm-row" style="margin-top:12px">
+            <div class="field"><label for="smPayout">Выплата платформы, %</label><input id="smPayout" type="number" min="1" max="100" value="80"></div>
+            <div class="field"><label for="smStake">Ставка, ₽</label><input id="smStake" type="number" min="1" value="100"></div>
+          </div>
+        </div>
+        <div class="panel sm-card">
+          <div class="row-between"><h3>Проверка вживую</h3><span class="ctx" id="smLiveSum">пока нет сигналов</span></div>
+          <p class="note">С момента открытия страницы. Каждый сигнал проверяется сам, когда истекает его время.</p>
+          <ul class="livelog" id="smLog" style="margin-top:10px"></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- CHART -->
-  <section id="view-chart" class="panel">
+  <section id="view-chart" class="panel" hidden>
     <div class="tools">
       <span class="lbl">Наложения</span>
       <span id="ovChips" style="display:contents"></span>
@@ -501,6 +578,26 @@ if strategy.position_size > 0 and (slPct > 0 or tpPct > 0)
 if strategy.position_size < 0 and (slPct > 0 or tpPct > 0)
     strategy.exit("S-выход", "S", stop = slPct > 0 ? strategy.position_avg_price * (1 + slPct / 100) : na, limit = tpPct > 0 ? strategy.position_avg_price * (1 - tpPct / 100) : na)
 `;}
+function simplePrep(c){const cl=c.map(b=>b.close);return{cl,e9:ema(cl,9),e21:ema(cl,21),r:rsi(cl,14)};}
+function simpleSignal(P,i){
+  const{cl,e9,e21,r}=P;if(i<30||isNaN(e21[i])||isNaN(r[i]))return{dir:0,parts:[]};
+  const parts=[];
+  const a=e9[i]>e21[i]?1:-1;parts.push({v:a,t:a>0?'Последние минуты цена в среднем растёт':'Последние минуты цена в среднем падает'});
+  const b=cl[i]>e9[i]?1:-1;parts.push({v:b,t:b>0?'Сейчас цена выше своей средней':'Сейчас цена ниже своей средней'});
+  const c3=r[i]>55?1:r[i]<45?-1:0;parts.push({v:c3,t:c3>0?'Покупателей сейчас больше':c3<0?'Продавцов сейчас больше':'Покупателей и продавцов поровну'});
+  const d=Math.sign(cl[i]-cl[i-3]);parts.push({v:d,t:d>0?'За 3 последние свечи цена поднялась':d<0?'За 3 последние свечи цена опустилась':'За 3 последние свечи цена не изменилась'});
+  const sum=a+b+c3+d;let dir=sum>=3?1:sum<=-3?-1:0;
+  if(dir===1&&r[i]>75){dir=0;parts.push({v:0,t:'Но рост уже перегрет, может развернуться'});}
+  if(dir===-1&&r[i]<25){dir=0;parts.push({v:0,t:'Но падение уже перегрето, может развернуться'});}
+  if(dir===0&&Math.abs(sum)<3)parts.push({v:0,t:'Признаки спорят друг с другом'});
+  return{dir,sum,parts};
+}
+function simpleStats(closed){
+  const P=simplePrep(closed);let hit=0,miss=0,draw=0,up=0,tot=0;
+  for(let i=30;i<closed.length-1;i++){const ch=closed[i+1].close-closed[i].close;if(ch>0)up++;tot++;
+    const s=simpleSignal(P,i);if(!s.dir)continue;if(ch===0)draw++;else if(Math.sign(ch)===s.dir)hit++;else miss++;}
+  return{hit,miss,draw,n:hit+miss,acc:hit+miss?hit/(hit+miss)*100:NaN,upShare:tot?up/tot*100:NaN};
+}
 /*CORE-END*/
 
 // ---------- Exchanges ----------
@@ -573,7 +670,7 @@ const LS={get(k,d){try{const v=localStorage.getItem('fitil.'+k);return v==null?d
 const S={ex:LS.get('ex','binance'),sym:LS.get('sym',null),tf:LS.get('tf','1h'),symbols:[],candles:[],token:0,favs:LS.get('favs',[]),
   ov:LS.get('ov',{ema20:true,ema50:true,ema200:false,bb:false,don:false}),osc:LS.get('osc','rsi'),
   ip:Object.assign({ema20:20,ema50:50,ema200:200,bbLen:20,bbMult:2,donLen:20,rsiLen:14,macdF:12,macdS:26,macdSig:9,stK:14,stS:3,atrLen:14},LS.get('ip',{})),
-  view:'chart',bt:null,btMarkers:null,loadingOlder:false,noOlder:false};
+  view:'simple',bt:null,btMarkers:null,loadingOlder:false,noOlder:false};
 const $=id=>document.getElementById(id);
 const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 function toast(msg,ms=4200){const t=$('toast');t.textContent=msg;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>t.hidden=true,ms);}
@@ -750,7 +847,7 @@ function renderDD(){
     :`<div class="empty">Ничего не нашлось на ${EX[S.ex].name}. Попробуй другую биржу.</div>`;
   dd.innerHTML=html;dd.hidden=false;
 }
-function pick(s){if(!s)return;$('dd').hidden=true;$('q').value='';$('q').blur();S.sym=s.id;loadChart();if(S.view!=='chart')setView('chart');}
+function pick(s){if(!s)return;$('dd').hidden=true;$('q').value='';$('q').blur();S.sym=s.id;loadChart();if(S.view==='simple')simpleLoad();else if(S.view!=='chart')setView('chart');}
 $('q').addEventListener('focus',()=>{ddIdx=0;renderDD();});
 $('q').addEventListener('input',()=>{ddIdx=0;renderDD();});
 $('q').addEventListener('keydown',e=>{if(e.key==='ArrowDown'){ddIdx=Math.min(ddIdx+1,ddItems.length-1);renderDD();e.preventDefault();}
@@ -773,7 +870,9 @@ function renderTf(){
 }
 $('tfRail').onclick=e=>{const b=e.target.closest('.tf');if(!b||b.disabled)return;S.tf=b.dataset.tf;renderTf();loadChart();poll();if(S.view==='backtest')btCtx();};
 function setView(v){S.view=v;document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.view===v));
-  for(const k of['chart','screener','backtest'])$('view-'+k).hidden=k!==v;
+  for(const k of['simple','chart','screener','backtest'])$('view-'+k).hidden=k!==v;
+  $('tfRail').hidden=v==='simple';LS.set('view',v);
+  if(v==='simple')simpleLoad();
   if(v==='backtest')btCtx();
   if(v==='chart'&&S.btMarkers===null&&S.candles.length)poll();}
 document.querySelector('.tabs').onclick=e=>{const t=e.target.closest('.tab');if(!t)return;
@@ -788,7 +887,7 @@ const IPL={ema20:'EMA 1, период',ema50:'EMA 2, период',ema200:'EMA 3
   rsiLen:'RSI, период',macdF:'MACD быстрая',macdS:'MACD медленная',macdSig:'MACD сигнальная',stK:'Stoch, период',stS:'Stoch, сглаживание',atrLen:'ATR, период'};
 function renderCfg(){$('indCfg').innerHTML=Object.entries(IPL).map(([k,l])=>`<div class="field"><label for="ip_${k}">${l}</label><input id="ip_${k}" data-ip="${k}" type="number" min="1" step="${k==='bbMult'?0.1:1}" value="${S.ip[k]}"></div>`).join('');}
 $('indCfg').addEventListener('change',e=>{const k=e.target.dataset.ip;const v=+e.target.value;if(!k||!(v>0))return;S.ip[k]=v;LS.set('ip',S.ip);renderTools();drawOverlays();drawOsc();});
-$('exSel').onchange=async()=>{S.ex=$('exSel').value;renderTf();if(!EX[S.ex].tf[S.tf])S.tf='1h';renderTf();if(await loadSymbols())loadChart();};
+$('exSel').onchange=async()=>{S.ex=$('exSel').value;renderTf();if(!EX[S.ex].tf[S.tf])S.tf='1h';renderTf();if(await loadSymbols()){loadChart();if(S.view==='simple')simpleLoad();}};
 
 // theme
 function applyTheme(t){if(t)document.documentElement.dataset.theme=t;else delete document.documentElement.dataset.theme;retheme();}
@@ -894,13 +993,82 @@ $('btShow').onclick=()=>{
   setLive('','просмотр бэктеста');toast('Показаны сделки бэктеста. Нажми «График» вверху, чтобы вернуться к живым данным.',5000);
 };
 
+// ---------- Simple mode ----------
+const SM={hz:LS.get('hz','1m'),c:[],token:0,live:[],lastClosedT:0,timer:null,loop:null};
+const HZ={'1m':['1 минуту','1 мин'],'5m':['5 минут','5 мин'],'15m':['15 минут','15 мин']};
+function smPayout(){return Math.max(1,Math.min(100,+$('smPayout').value||80))/100;}
+function smBE(){return 100/(1+smPayout());}
+async function simpleLoad(){
+  if(!S.sym)return;const ex=EX[S.ex],my=++SM.token;SM.live=[];SM.lastClosedT=0;renderLive();
+  $('smTitle').textContent=`${pairName(symObj())} · сделка на ${HZ[SM.hz][0]}`;
+  document.querySelectorAll('#smHz .tf').forEach(b=>b.classList.toggle('on',b.dataset.hz===SM.hz));
+  try{const c=await fetchCandles(ex,S.sym,SM.hz,1000);if(my!==SM.token)return;SM.c=c;simpleRender(true);setLive('ok',`${ex.name} · онлайн`);}
+  catch(e){if(my!==SM.token)return;setLive('err','ошибка');$('smVerdict').className='verdict';
+    $('smVerdict').innerHTML=`<div class="arrow">!</div><div class="word">Нет данных</div><div class="sub">${e.message}</div>`;}
+  clearInterval(SM.loop);SM.loop=setInterval(simpleTick,2500);
+}
+async function simpleTick(){
+  if(S.view!=='simple'||document.hidden||!SM.c.length)return;const ex=EX[S.ex],my=SM.token;
+  try{const b=await ex.klines(S.sym,SM.hz,3,null);if(my!==SM.token)return;
+    for(const x of b){const last=SM.c[SM.c.length-1];if(x.t===last.t)SM.c[SM.c.length-1]=x;else if(x.t>last.t)SM.c.push(x);}
+    if(SM.c.length>1500)SM.c=SM.c.slice(-1200);
+    simpleRender(false);$('lastPx').textContent=fmtP(SM.c[SM.c.length-1].close);setLive('ok',`${ex.name} · онлайн`);
+  }catch(e){setLive('err','нет обновлений');}
+}
+function simpleRender(full){
+  const closed=SM.c.slice(0,-1);if(closed.length<40)return;
+  const lastT=closed[closed.length-1].t,newClose=lastT!==SM.lastClosedT;
+  if(!newClose&&!full)return;
+  // resolve live predictions whose expiry candle has now closed
+  for(const L of SM.live){if(L.res)continue;const k=closed.findIndex(b=>b.t===L.exp);
+    if(k>=0){const ch=closed[k].close-L.entry;L.exit=closed[k].close;L.res=ch===0?'draw':(Math.sign(ch)===L.dir?'hit':'miss');}}
+  const P=simplePrep(closed),i=closed.length-1,sg=simpleSignal(P,i);
+  const tfS=TFS.find(t=>t.id===SM.hz).s*1000;
+  if(newClose&&SM.lastClosedT&&sg.dir){SM.live.unshift({t:lastT+tfS,exp:lastT+tfS,dir:sg.dir,entry:closed[i].close,res:null});SM.live=SM.live.slice(0,50);}
+  SM.lastClosedT=lastT;
+  const v=$('smVerdict');
+  if(sg.dir===1){v.className='verdict up';v.innerHTML=`<div class="arrow">↑</div><div class="word">Скорее вверх</div><div class="sub">Прогноз на ${HZ[SM.hz][0]} от цены ${fmtP(closed[i].close)}</div>`;}
+  else if(sg.dir===-1){v.className='verdict down';v.innerHTML=`<div class="arrow">↓</div><div class="word">Скорее вниз</div><div class="sub">Прогноз на ${HZ[SM.hz][0]} от цены ${fmtP(closed[i].close)}</div>`;}
+  else{v.className='verdict';v.innerHTML=`<div class="arrow">—</div><div class="word">Непонятно, лучше не входить</div><div class="sub">Сигнал появится, когда признаки сойдутся</div>`;}
+  $('smWhy').innerHTML=sg.parts.map(p=>`<li><b class="${p.v>0?'p':p.v<0?'m':'z'}">${p.v>0?'↑':p.v<0?'↓':'·'}</b><span>${p.t}</span></li>`).join('');
+  const st=simpleStats(closed);SM.stats=st;renderHonest();renderLive();
+}
+function renderHonest(){
+  const st=SM.stats;if(!st)return;const be=smBE(),pay=smPayout(),stake=Math.max(1,+$('smStake').value||100);
+  $('smBe').style.left=be+'%';$('smBeL').textContent='ноль: '+be.toFixed(1).replace('.',',')+'%';
+  if(!st.n){$('smAcc').textContent='—';$('smAccTxt').textContent='на этом отрезке не было ни одного сигнала';$('smBar').style.width='0';$('smPnl').textContent='—';$('smHonest').hidden=true;return;}
+  $('smAcc').textContent=st.acc.toFixed(1).replace('.',',')+'%';
+  $('smAccTxt').textContent=`угадано ${st.hit} из ${st.n} сигналов за последние ${SM.c.length-1} свечей`;
+  $('smBar').style.width=Math.min(100,st.acc)+'%';
+  const pnl=st.hit*stake*pay-st.miss*stake;$('smPnl').textContent=(pnl>=0?'+':'−')+Math.abs(Math.round(pnl)).toLocaleString('ru-RU')+' ₽';$('smPnl').className=pnl>=0?'pos':'neg';
+  $('smCoin').textContent=`≈50% → ${'−'+Math.round(st.n*stake*(1-pay)/2).toLocaleString('ru-RU')} ₽`;$('smCoin').className='neg';
+  const h=$('smHonest');h.hidden=false;
+  if(st.acc<be){h.className='verdict-box bad';h.innerHTML=`<b>На этой паре сигнал не окупается.</b> Он угадывает ${st.acc.toFixed(1).replace('.',',')}%, а чтобы не терять деньги при выплате ${Math.round(pay*100)}%, нужно хотя бы ${be.toFixed(1).replace('.',',')}%. Поменяй пару или время сделки и посмотри, изменится ли что-то.`;}
+  else{h.className='verdict-box ok';h.innerHTML=`<b>На истории сигнал был выше порога.</b> Это ещё не значит, что так будет дальше: на коротком отрезке часто везёт случайно. Посмотри, подтвердится ли это в «Проверке вживую» хотя бы на 50 сигналах, и только на демо-счёте.`;}
+}
+function renderLive(){
+  const done=SM.live.filter(l=>l.res&&l.res!=='draw'),hits=done.filter(l=>l.res==='hit').length;
+  $('smLiveSum').textContent=SM.live.length?`угадано ${hits} из ${done.length}`:'пока нет сигналов';
+  $('smLog').innerHTML=SM.live.length?SM.live.map(l=>`<li><span>${new Date(l.exp-TFS.find(t=>t.id===SM.hz).s*1000).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})} ${l.dir>0?'<span class="pos">↑ вверх</span>':'<span class="neg">↓ вниз</span>'}</span><span>${fmtP(l.entry)}${l.res?' → '+fmtP(l.exit):''}</span><span>${!l.res?'<span style="color:var(--muted)">ждём…</span>':l.res==='hit'?'<span class="pos">угадал</span>':l.res==='miss'?'<span class="neg">мимо</span>':'ничья'}</span></li>`).join('')
+    :'<li style="color:var(--muted)">Оставь страницу открытой: каждый новый сигнал появится здесь и проверится сам.</li>';
+}
+function smClock(){
+  if(S.view!=='simple')return;const s=TFS.find(t=>t.id===SM.hz).s,now=Date.now()/1000,left=Math.ceil(s-(now%s));
+  $('smTimer').textContent=`новая свеча через ${left>=60?Math.floor(left/60)+':'+String(left%60).padStart(2,'0'):left+' с'}`;
+  $('smRing').setAttribute('stroke-dashoffset',(94.25*(1-left/s)).toFixed(2));
+}
+setInterval(smClock,1000);
+$('smHz').onclick=e=>{const b=e.target.closest('[data-hz]');if(!b)return;SM.hz=b.dataset.hz;LS.set('hz',SM.hz);simpleLoad();};
+$('smPayout').addEventListener('input',renderHonest);$('smStake').addEventListener('input',renderHonest);
+
 // ---------- Boot ----------
 (async function boot(){
   const th=LS.get('theme',null);if(th)document.documentElement.dataset.theme=th;
   if(!window.LightweightCharts){toast('Не загрузилась библиотека графиков. Проверь интернет и обнови страницу.',10000);return;}
   $('exSel').value=S.ex;if(!EX[S.ex].tf[S.tf])S.tf='1h';
   initCharts();renderTf();renderTools();renderCfg();renderParams();renderScreener();
-  if(await loadSymbols()){await loadChart();poll();}
+  const v0=LS.get('view','simple');
+  if(await loadSymbols()){setView(['simple','chart','screener','backtest'].includes(v0)?v0:'simple');await loadChart();poll();}
 })();
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)poll();});
 </script>
